@@ -1,19 +1,85 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Header } from "./header"
 import { Sidebar } from "./sidebar"
 import { ConversationList } from "./conversation-list"
 import { ChatArea } from "./chat-area"
 import { DetailsPanel } from "./details-panel"
-import { conversations, type Conversation } from "@/lib/data"
+import { InboxLayoutSkeleton } from "./inbox-skeleton"
+import { fetchUsers } from "@/lib/api/users"
+import type { Conversation } from "@/lib/data"
 
 export function InboxLayout() {
-  const [selectedConversation, setSelectedConversation] = useState<Conversation>(conversations[0])
+  // State for API data
+  const [conversations, setConversations] = useState<Conversation[]>([])
+  
+  // State for loading
+  const [loading, setLoading] = useState(true)
+  
+  // State for errors
+  const [error, setError] = useState<string | null>(null)
+  
+  // State for selected conversation
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null)
+  
+  // Other states
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileView, setMobileView] = useState<"list" | "chat" | "details">("list")
   const [showSidebar, setShowSidebar] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
+
+  // Load data on page load
+  useEffect(() => {
+    async function loadData() {
+      try {
+        setLoading(true)
+        const data = await fetchUsers()
+        setConversations(data)
+        
+        if (data.length > 0) {
+          setSelectedConversation(data[0])
+        }
+      } catch (err) {
+        setError('A data fetching error occurred')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadData()
+  }, [])
+
+  // Displaying the loading status using Skeleton
+  if (loading) {
+    return <InboxLayoutSkeleton />
+  }
+
+  // Display error status
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-background">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Checking for selected conversation
+  if (!selectedConversation) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-background">
+        <p className="text-muted-foreground">No conversations found</p>
+      </div>
+    )
+  }
 
   const handleSelectConversation = (conv: Conversation) => {
     setSelectedConversation(conv)

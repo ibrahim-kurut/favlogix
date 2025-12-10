@@ -1,9 +1,11 @@
 "use client"
 
 import { useState } from "react"
+import { useTheme } from "next-themes"
 import {
   MoreVertical,
   Moon,
+  Sun,
   Calendar,
   ImageIcon,
   Video,
@@ -29,6 +31,11 @@ interface ChatAreaProps {
 
 export function ChatArea({ conversation, onBack, onDetailsClick }: ChatAreaProps) {
   const [message, setMessage] = useState("")
+  const { theme, setTheme } = useTheme()
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark")
+  }
 
   return (
     <div className="flex flex-1 flex-col bg-background w-full">
@@ -44,8 +51,17 @@ export function ChatArea({ conversation, onBack, onDetailsClick }: ChatAreaProps
           <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10">
             <MoreVertical className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10 hidden sm:flex">
-            <Moon className="h-4 w-4 sm:h-5 sm:w-5" />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 sm:h-10 sm:w-10 hidden sm:flex"
+            onClick={toggleTheme}
+          >
+            {theme === "dark" ? (
+              <Sun className="h-4 w-4 sm:h-5 sm:w-5" />
+            ) : (
+              <Moon className="h-4 w-4 sm:h-5 sm:w-5" />
+            )}
           </Button>
           <Button variant="outline" size="icon" className="h-8 w-8 sm:h-10 sm:w-10 bg-transparent">
             <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
